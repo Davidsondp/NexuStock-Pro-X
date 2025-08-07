@@ -1,25 +1,36 @@
-from gtts import gTTS
+import pyttsx3
 from io import BytesIO
-from fastapi.responses import StreamingResponse
 
-class SintetizadorVoz:
+class ServicioVoz:
     def __init__(self):
-        self.voices = {
-            "es": "es-ES",  # Español
-            "ht": "ht-HT",  # Criollo Haitiano
-            "en": "en-US"
+        self.motor = pyttsx3.init()
+        self.voces = {
+            'es': 'spanish-latin-am',
+            'ht': 'mb-haitian',
+            'en': 'english-us',
+            'fr': 'french'
         }
     
-    def generar_audio(self, texto: str, idioma: str = "es"):
-        tts = gTTS(text=texto, lang=self.voices.get(idioma, "es"))
-        audio_bytes = BytesIO()
-        tts.write_to_fp(audio_bytes)
-        audio_bytes.seek(0)
-        return audio_bytes
+    def texto_a_voz(self, texto: str, idioma: str) -> BytesIO:
+        self.motor.setProperty('voice', self.voces.get(idioma, 'english-us'))
+        
+        salida = BytesIO()
+        self.motor.save_to_file(texto, salida.name)
+        self.motor.runAndWait()
+        
+        salida.seek(0)
+        return salida
 
-# Uso en endpoint:
+# Endpoint de voz
 @router.get("/hablar")
-async def hablar(texto: str, idioma: str = "es"):
-    voz = SintetizadorVoz()
-    audio = voz.generar_audio(texto, idioma)
-    return StreamingResponse(audio, media_type="audio/mpeg")
+async def hablar_texto(
+    texto: str,
+    idioma: str = "es",
+    voz: ServicioVoz = Depends()
+):
+    audio = voz.texto_a_voz(texto, idioma)
+    return StreamingResponse(
+        audio,
+        media_type="audio/wav",
+        headers={"Content-Disposition": "inline"}
+    )
