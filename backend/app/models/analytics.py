@@ -1,25 +1,25 @@
-from sqlalchemy import Column, String, DateTime, Numeric, ForeignKey
+from sqlalchemy import Column, String, DateTime, Numeric, ForeignKey, Integer
 from sqlalchemy.sql import func
 from .base import Base
 
-class SalesAnalytics(Base):
-    __tablename__ = "sales_analytics"
+class AnalisisVentas(Base):
+    __tablename__ = "analisis_ventas"
     
     id = Column(String, primary_key=True)
-    product_id = Column(String, ForeignKey("products.id"))
-    date = Column(DateTime, nullable=False)
-    total_sales = Column(Numeric(12, 2))
-    units_sold = Column(Integer)
-    profit = Column(Numeric(12, 2))
-    category = Column(String)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    producto_id = Column(String, ForeignKey("productos.id"))
+    fecha = Column(DateTime, nullable=False)
+    ventas_totales = Column(Numeric(12, 2))  # En HTG
+    unidades_vendidas = Column(Integer)
+    ganancia = Column(Numeric(12, 2))
+    categoria = Column(String)
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
 
-class InventoryTrend(Base):
-    __tablename__ = "inventory_trends"
+class TendenciaInventario(Base):
+    __tablename__ = "tendencias_inventario"
     
     id = Column(String, primary_key=True)
-    product_id = Column(String, ForeignKey("products.id"))
-    date = Column(DateTime, nullable=False)
-    stock_level = Column(Integer)
-    demand_forecast = Column(Integer)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    producto_id = Column(String, ForeignKey("productos.id"))
+    fecha = Column(DateTime, nullable=False)
+    nivel_stock = Column(Integer)
+    pronostico_demanda = Column(Integer)  # Basado en IA
+    creado_en = Column(DateTime(timezone=True), server_default=func.now())
