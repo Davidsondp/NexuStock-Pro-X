@@ -1,39 +1,40 @@
 import httpx
 from decimal import Decimal
+from datetime import datetime
 
-class ConversorMoneda:
+class CurrencyConverter:
     def __init__(self):
         self.cache = {}
     
-    async def obtener_tasa_cambio(self, moneda_origen: str, moneda_destino: str) -> Decimal:
-        if moneda_origen == moneda_destino:
+    async def get_exchange_rate(self, from_curr: str, to_curr: str) -> Decimal:
+        if from_curr == to_curr:
             return Decimal("1.0")
         
-        clave_cache = f"{moneda_origen}_{moneda_destino}"
-        if clave_cache in self.cache:
-            return self.cache[clave_cache]
+        cache_key = f"{from_curr}_{to_curr}"
+        if cache_key in self.cache:
+            return self.cache[cache_key]
         
-        # Ejemplo: API del Banco Central de Haití
-        async with httpx.AsyncClient() as cliente:
-            respuesta = await cliente.get(
-                f"https://api.bancentral.gov.do/tasas/{moneda_origen}/{moneda_destino}"
+        # API de bancos centrales (ejemplo: Banco de la República de Haití)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.bancentral.gov.do/rates/{from_curr}/{to_curr}"
             )
-            tasa = Decimal(respuesta.json()["tasa"])
+            rate = Decimal(response.json()["rate"])
         
-        self.cache[clave_cache] = tasa
-        return tasa
+        self.cache[cache_key] = rate
+        return rate
 
-# Uso en endpoint
-@router.get("/convertir")
-async def convertir_moneda(
-    monto: float,
-    moneda_origen: str,
-    moneda_destino: str,
-    conversor: ConversorMoneda = Depends()
+# Uso en endpoints
+@router.get("/convert")
+async def convert_currency(
+    amount: float,
+    from_currency: str,
+    to_currency: str,
+    converter: CurrencyConverter = Depends()
 ):
-    tasa = await conversor.obtener_tasa_cambio(moneda_origen, moneda_destino)
+    rate = await converter.get_exchange_rate(from_currency, to_currency)
     return {
-        "monto_original": monto,
-        "monto_convertido": float(Decimal(monto) * tasa),
-        "moneda": moneda_destino
+        "original_amount": amount,
+        "converted_amount": float(Decimal(amount) * rate),
+        "currency": to_currency
     }
