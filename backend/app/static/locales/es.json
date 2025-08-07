@@ -1,1 +1,5 @@
-
+{
+  "welcome": "Bienvenido",
+  "product_name": "Nombre del Producto",
+  "price": "Precio"
+}
