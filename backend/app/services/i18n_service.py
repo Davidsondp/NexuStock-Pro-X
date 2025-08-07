@@ -1,24 +1,23 @@
-from fastapi_i18n import I18nMiddleware, I18n
+from fastapi_i18n import I18nMiddleware, Translator
 from pathlib import Path
-from fastapi import Request
+from typing import Dict
 
-class GestorI18N:
+class ServicioI18N:
     def __init__(self):
-        self.i18n = I18nMiddleware(
-            default_locale="es",
-            locales=["es", "en", "fr", "ht"],  # Español, Inglés, Francés, Criollo Haitiano
-            directory=Path("locales")  # Carpeta con archivos JSON de traducción
+        self.traductor = Translator(
+            directorio_locales=[Path("locales")],
+            idioma_predeterminado="es",
+            idiomas_soportados=["es", "en", "fr", "ht", "pt", "zh", "ar"]
         )
     
-    def traducir(self, clave: str, request: Request, **kwargs):
-        locale = request.headers.get("Accept-Language", "es")
-        return self.i18n._(clave, locale=locale, **kwargs)
+    def traducir(self, clave: str, idioma: str, **kwargs) -> str:
+        return self.traductor.translate(clave, locale=idioma, **kwargs)
 
-# Ejemplo de uso en endpoints:
-@router.get("/producto")
-async def obtener_producto(request: Request):
-    gestor = GestorI18N()
+# Ejemplo de uso en endpoints
+@router.get("/bienvenida")
+async def bienvenida_usuario(idioma: str = Header("es")):
+    i18n = ServicioI18N()
     return {
-        "nombre": gestor.traducir("nombre_producto", request),
-        "precio": gestor.traducir("precio_htg", request, cantidad=1000)
+        "mensaje": i18n.traducir("mensaje_bienvenida", idioma),
+        "moneda": i18n.traducir("moneda", idioma, moneda="HTG")
     }
