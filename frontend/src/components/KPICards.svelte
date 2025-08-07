@@ -1,30 +1,30 @@
 <script>
-  export let metrics = {
-    totalSales: 0,
-    avgTurnover: 0,
-    topProduct: null,
-    stockAlerts: 0
+  export let metricas = {
+    ventasTotales: 0,
+    rotacionPromedio: 0,
+    productoTop: null,
+    alertasStock: 0
   };
 </script>
 
-<div class="kpi-grid">
-  <div class="kpi-card">
+<div class="grid-kpi">
+  <div class="tarjeta-kpi">
     <h3>Ventas Totales</h3>
-    <div class="value">${metrics.totalSales.toFixed(2)} HTG</div>
+    <div class="valor">${metricas.ventasTotales.toFixed(2)} HTG</div>
   </div>
   
-  <div class="kpi-card">
+  <div class="tarjeta-kpi">
     <h3>Rotación Promedio</h3>
-    <div class="value">{metrics.avgTurnover.toFixed(2)}</div>
+    <div class="valor">{metricas.rotacionPromedio.toFixed(2)}</div>
   </div>
   
-  <div class="kpi-card">
+  <div class="tarjeta-kpi">
     <h3>Producto Más Vendido</h3>
-    <div class="value">{metrics.topProduct?.name || 'N/A'}</div>
+    <div class="valor">{metricas.productoTop?.nombre || 'N/A'}</div>
   </div>
   
-  <div class="kpi-card">
+  <div class="tarjeta-kpi">
     <h3>Alertas de Stock</h3>
-    <div class="value">{metrics.stockAlerts}</div>
+    <div class="valor">{metricas.alertasStock}</div>
   </div>
 </div>
