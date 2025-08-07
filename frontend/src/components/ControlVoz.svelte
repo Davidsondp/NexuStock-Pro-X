@@ -1,32 +1,36 @@
-<script>
-  let escuchando = false;
-  let textoReconocido = "";
-  
-  function iniciarReconocimiento() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = "es-ES";  // Puede cambiarse dinámicamente
-    
-    recognition.onresult = (event) => {
-      textoReconocido = event.results[0][0].transcript;
-      enviarComando(textoReconocido);
-    };
-    
-    recognition.start();
-    escuchando = true;
-  }
-  
-  async function enviarComando(texto) {
-    const response = await fetch("/api/voz/procesar", {
-      method: "POST",
-      body: JSON.stringify({ comando: texto })
-    });
-    // Reproducir respuesta auditiva
-    const audio = new Audio(await response.blob());
-    audio.play();
-  }
-</script>
+import pyttsx3
+from io import BytesIO
 
-<button on:click={iniciarReconocimiento} disabled={escuchando}>
-  {escuchando ? "Escuchando..." : "Hablar"}
-</button>
-<p>{textoReconocido || "Di algo..."}</p>
+class ServicioVoz:
+    def __init__(self):
+        self.motor = pyttsx3.init()
+        self.voces = {
+            'es': 'spanish-latin-am',
+            'ht': 'mb-haitian',
+            'en': 'english-us',
+            'fr': 'french'
+        }
+    
+    def texto_a_voz(self, texto: str, idioma: str) -> BytesIO:
+        self.motor.setProperty('voice', self.voces.get(idioma, 'english-us'))
+        
+        salida = BytesIO()
+        self.motor.save_to_file(texto, salida.name)
+        self.motor.runAndWait()
+        
+        salida.seek(0)
+        return salida
+
+# Endpoint de voz
+@router.get("/hablar")
+async def hablar_texto(
+    texto: str,
+    idioma: str = "es",
+    voz: ServicioVoz = Depends()
+):
+    audio = voz.texto_a_voz(texto, idioma)
+    return StreamingResponse(
+        audio,
+        media_type="audio/wav",
+        headers={"Content-Disposition": "inline"}
+    )
