@@ -1,13 +1,13 @@
 <script>
   export let precioHtg;
-  export let moneda = "USD";
+  export let moneda = "HTG";
   
   let precioConvertido = null;
   
-  async function convertir() {
-    const respuesta = await fetch(`/api/convertir?monto=${precioHtg}&origen=HTG&destino=${moneda}`);
-    const datos = await respuesta.json();
-    precioConvertido = datos.monto_convertido;
+  async function convertirMoneda() {
+    const response = await fetch(`/api/convert?amount=${precioHtg}&from=HTG&to=${moneda}`);
+    const data = await response.json();
+    precioConvertido = data.converted_amount;
   }
 </script>
 
@@ -16,7 +16,7 @@
     <p>{precioConvertido.toFixed(2)} {moneda}</p>
   {:else}
     <p>{precioHtg} HTG</p>
-    <button on:click={convertir}>
+    <button on:click={convertirMoneda}>
       Convertir a {moneda}
     </button>
   {/if}
