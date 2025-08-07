@@ -3,53 +3,53 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timedelta
 from sqlalchemy import select, func
 
-async def generate_sales_report(
+async def generar_reporte_ventas(
     db: AsyncSession,
-    start_date: datetime,
-    end_date: datetime,
-    category: str = None
+    fecha_inicio: datetime,
+    fecha_fin: datetime,
+    categoria: str = None
 ):
     query = select(
-        SalesAnalytics.date,
-        func.sum(SalesAnalytics.total_sales).label("total_sales"),
-        func.sum(SalesAnalytics.units_sold).label("units_sold")
+        AnalisisVentas.fecha,
+        func.sum(AnalisisVentas.ventas_totales).label("ventas_totales"),
+        func.sum(AnalisisVentas.unidades_vendidas).label("unidades_vendidas")
     ).where(
-        SalesAnalytics.date.between(start_date, end_date)
+        AnalisisVentas.fecha.between(fecha_inicio, fecha_fin)
     ).group_by(
-        SalesAnalytics.date
+        AnalisisVentas.fecha
     ).order_by(
-        SalesAnalytics.date
+        AnalisisVentas.fecha
     )
     
-    if category:
-        query = query.where(SalesAnalytics.category == category)
+    if categoria:
+        query = query.where(AnalisisVentas.categoria == categoria)
     
-    result = await db.execute(query)
-    return pd.DataFrame(result.all())
+    resultado = await db.execute(query)
+    return pd.DataFrame(resultado.all())
 
-async def calculate_inventory_turnover(
+async def calcular_rotacion_inventario(
     db: AsyncSession,
-    product_id: str = None
+    producto_id: str = None
 ):
-    # Fórmula: Costo de Ventas / Inventario Promedio
+    # Fórmula: (Ventas / Inventario Promedio)
     query = """
     SELECT 
         p.id,
-        p.name->>'es' as name,
-        COALESCE(SUM(CASE WHEN m.type = 'salida' THEN m.quantity ELSE 0 END), 0) as units_sold,
-        AVG(p.stock) as avg_stock,
+        p.nombre->>'es' as nombre,
+        COALESCE(SUM(CASE WHEN m.tipo = 'salida' THEN m.cantidad ELSE 0 END), 0) as unidades_vendidas,
+        AVG(p.stock) as inventario_promedio,
         CASE 
             WHEN AVG(p.stock) > 0 
-            THEN (SUM(CASE WHEN m.type = 'salida' THEN m.quantity ELSE 0 END) / AVG(p.stock)) 
+            THEN (SUM(CASE WHEN m.tipo = 'salida' THEN m.cantidad ELSE 0 END) / AVG(p.stock)) 
             ELSE 0 
-        END as turnover_rate
-    FROM products p
-    LEFT JOIN inventory_movements m ON p.id = m.product_id
+        END as tasa_rotacion
+    FROM productos p
+    LEFT JOIN movimientos_inventario m ON p.id = m.producto_id
     GROUP BY p.id
     """
     
-    if product_id:
-        query += f" HAVING p.id = '{product_id}'"
+    if producto_id:
+        query += f" HAVING p.id = '{producto_id}'"
     
-    result = await db.execute(query)
-    return pd.DataFrame(result.all())
+    resultado = await db.execute(query)
+    return pd.DataFrame(resultado.all())
