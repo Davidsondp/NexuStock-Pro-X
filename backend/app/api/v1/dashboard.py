@@ -15,6 +15,18 @@ async def get_dashboard_data(
     _ = Depends(is_manager)
 ):
     return await generate_dashboard_data(db)
+@router.get("/category-distribution")
+async def get_category_distribution(
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(
+            Product.category,
+            func.count(Product.id).label("count")
+        )
+        .where(Product.is_active == True)
+        .group_by(Product.category)
+    )
 
 @router.get("/movement-trends", response_model=List[MovementTrend])
 async def get_movement_trends(
