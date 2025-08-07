@@ -1,5 +1,12 @@
 {
-  "welcome": "Byenvini",
-  "product_name": "Non Pwodwi",
-  "price": "Pri"
+    "welcome": {
+        "AMERICA": "Byenvini nan Amerik",
+        "AFRICA": "Byenvini nan Afrik",
+        "ASIA": "Byenvini nan Azi"
+    },
+    "currency": {
+        "HTG": "Goud",
+        "USD": "Dola Ameriken",
+        "EUR": "Euro"
+    }
 }
