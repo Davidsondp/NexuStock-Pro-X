@@ -1,15 +1,18 @@
 <script>
   const idiomas = [
     { codigo: "es", nombre: "Español" },
-    { codigo: "ht", nombre: "Creole Haitiano" },
-    { codigo: "en", nombre: "Inglés" },
-    { codigo: "fr", nombre: "Francés" }
+    { codigo: "ht", nombre: "Kreyòl Ayisyen" },
+    { codigo: "en", nombre: "English" },
+    { codigo: "fr", nombre: "Français" },
+    { codigo: "pt", nombre: "Português" },
+    { codigo: "zh", nombre: "中文" },
+    { codigo: "ar", nombre: "العربية" }
   ];
 
   function cambiarIdioma(codigo) {
-    fetch("/api/config/idioma", {
+    fetch("/api/config/locale", {
       method: "POST",
-      body: JSON.stringify({ idioma: codigo })
+      body: JSON.stringify({ locale: codigo })
     });
     location.reload();
   }
